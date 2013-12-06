@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<META charset="UTF-8">
+		<title>fractal3</title>
+		<link href='http://fonts.googleapis.com/css?family=Titillium+Web:300' rel='stylesheet' type='text/css'>
+		<style>
+			body {
+				font-size: 24px;
+				font-family: "Titillium Web";
+				font-weight: 300;
+			}
+
+			.field {
+				margin-bottom: 0.5em;
+				width : 450px;
+				height : 450px;
+				border: 2px solid black;
+			}
+
+			.button {
+				display: block;
+				margin-left: 11em;
+				margin-bottom: 2em;
+				padding: 0.3em;
+				font-size: 1.2em;
+				background-color: #FFF;
+				border: 1px solid black;
+				border-radius: 5px;
+			}
+			#a,#b{
+				margin-bottom: 1em;
+			}
+		</style>
+		<script type="text/javascript" src="js/libs/jquery-2.0.3.min.js"></script>
+	</head>
+	<body>
+		<canvas id='field' width="400" height="400" class="field"></canvas>
+		<form id="parameters" onsubmit="return false;">
+			<label for="a">a</label>
+			<input type="number"step="0.1" id="a" value="1.4">
+			<label for="b">b</label>
+			<input type="number" step="0.1" id="b" value="0.3">
+			<button type="button" onClick="makeTransformation();" class="button">Построить</button>
+		</form>
+		<script type="text/javascript">
+			var canvas;
+			var context;
+			var dimension = 400;
+			var Tmatr = new Array(dimension);
+			var Nmax = 90000;
+			var a;
+			var b;
+			var x;
+			var y;
+			var xnext;
+			var ynext;
+			var i; 
+			var j;
+
+			$(document).ready(init);
+			
+			function init() {			
+				// console.log("we are ready");
+				canvas = $("#field")[0];
+				context = canvas.getContext('2d');
+				context.lineWidth = 1;
+				for (var i = 0; i < dimension; i++)
+				{
+					Tmatr[i] = new Array(dimension);
+					for (var j = 0; j < dimension; j++) 
+					{
+						Tmatr[i][j] = 255;
+						if ((i == 1) && (j == 1))
+							Tmatr[i][j] = 0;
+					}
+				}
+				var m1 = dimension;
+				var m2 = dimension;
+				var w1; 
+
+				a = $("#a")[0].value;
+				b = $("#b")[0].value;
+				x = 0;
+				y = 0;
+				xnext = 0;
+				ynext = 0;
+				i = 0;
+				j = 0;
+				//drawMatrix(Tmatr);
+			}
+			
+			function makeTransformation() {
+				init();
+				console.log("a: "+a+" b: "+b);
+				for (var k = 0; k < Nmax; k++) {
+					xnext = y + 1 - a*x*x;
+					ynext = b*x;					
+			    //	console.log(xnext + " " + ynext);
+					i = Math.round(xnext * 100);
+					j = Math.round(ynext * 100);
+			    	//console.log(toMatr(i) + " " + toMatr(j));
+					if ((toMatr(i) > 0) && (toMatr(i) < dimension) && (toMatr(j) > 0) 
+						&& (toMatr(j) < dimension)) {
+						Tmatr[toMatr(i)][toMatr(j)] = 0;					
+					//	console.log("done");
+					}
+					x = xnext;
+					y = ynext;
+				}
+				drawMatrix(Tmatr);
+			}
+			
+			
+			function drawMatrix(matrix) {
+				canvas.width = canvas.width;
+			    var imageData = context.getImageData(0, 0, dimension, dimension);  
+				var data = imageData.data;
+				console.log("drawMatrix");
+				for (var i = 0; i < dimension; i++)
+				{
+					for (var j = 0; j < dimension; j++)
+					{
+					//	console.log(i + " " + j);
+						//console.log(matrix[i][j]);
+					    data[((dimension * (dimension-j)) + i) * 4] = matrix[i][j]; //red
+						data[((dimension * (dimension-j)) + i) * 4 + 1] = matrix[i][j]; //green
+						data[((dimension * (dimension-j)) + i) * 4 + 2] = matrix[i][j];  //blue
+						data[((dimension * (dimension-j)) + i) * 4 + 3] = 255;  //alpha
+					}
+				}
+				context.clearRect(0, 0, dimension, dimension);  
+				context.putImageData(imageData, 0, 0); 
+			}
+			
+			function toMatr(i) {
+				return i+(dimension/2);
+			}
+			
+			function toCoord(i) {
+				return i - 100;
+			}
+		</script>
+	</body>
+</html>
