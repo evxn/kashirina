@@ -9,7 +9,6 @@
 				font-size: 24px;
 				font-family: "Titillium Web";
 				font-weight: 300;
-				background: #bbb;
 			}
 
 			.field {
@@ -155,10 +154,13 @@
 				canvas.width = canvas.width;
 			    var imageData = context.getImageData(0, 0, dimension, dimension);  
 				var data = imageData.data;
+				// console.log("drawMatrix");
 				for (var i = 0; i < dimension; i++)
 				{
 					for (var j = 0; j < dimension; j++)
 					{
+					//	console.log(i + " " + j);
+						//console.log(matrix[i][j]);
 					    data[((dimension * (dimension-j)) + i) * 4] = matrix[i][j]; //red
 						data[((dimension * (dimension-j)) + i) * 4 + 1] = matrix[i][j]; //green
 						data[((dimension * (dimension-j)) + i) * 4 + 2] = matrix[i][j];  //blue
@@ -171,19 +173,24 @@
 			
 			function toMatr(i) {
 				return i-140
+				// return i+(dimension/2);
+				// return i;
 			}
 			
 			function toCoord(i) {
+				// return i - dimension/2;
 				return i - 200;
 			}
 
 			function toCanvas(r) {
 				var x = Math.floor(0.9*r*dimension);
+				// var x = dimension - Math.floor(r*dimension);
 				return  x;
 			}
 		
 			function toPlane(n) {
 				var x = n/dimension;
+				// var x = 1- n/dimension;
 				return x;
 			}
 
