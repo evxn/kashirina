@@ -45,9 +45,12 @@
 		<script type="text/javascript" src="js/libs/jquery-2.0.3.min.js"></script>
 	</head>
 	<body>
+		<label for="field">Phase Plane:</label>
 		<canvas id='field' width="600" height="600" class="field"></canvas>
 		<div class="interface">
-			<button type="button" onClick="makeTransformation();" class="button">Фазовый портрет</button>
+			<button type="button" onClick="makeTransformation();" class="button">
+				Plot
+			</button>
 			<form id="parameters" onsubmit="return false;">
 				<label for="a">a
 					<input class="param-input" type="number"step="0.001" id="a" value="0.1">
@@ -61,7 +64,7 @@
 				<label for="tau">&tau;
 					<input class="param-input" type="number" step="1" id="tau" value="30">
 				</label>
-				<label for="xnegative">x(t) на [-&tau;,0]
+				<label for="xnegative">x(t) on [-&tau;,0]
 					<input class="param-input" type="number" step="0.1" id="xnegative" value="0.5">
 				</label>
 			</form>
@@ -69,12 +72,11 @@
 		<script type="text/javascript">
 			var canvas;
 			var context;
-			var dimension = 600;
-			var Tmatr = new Array(dimension);
-			var Nmax = 1000;
-			var Tmin = 30;
-			var Tmax = 200000;
-			xcash = [];		
+			var dimension;
+			var Tmatr = [];
+			var Nmax;
+			var Tmax;
+			var xcash = [];		
 
 			var a;
 			var b;
@@ -88,43 +90,42 @@
 
 			var i; 
 			var j;
-			var points_counter = 0;
+			var points_counter;
 
 			
 			function init() {			
-				// console.log("we are ready");
-				canvas = $("#field")[0];
-				context = canvas.getContext('2d');
-				context.lineWidth = 1;
-				Tmatr = []
-				for (var i = 0; i < dimension; i++)
-				{
-					Tmatr[i] = new Array(dimension);
-					for (var j = 0; j < dimension; j++) 
-					{
-						Tmatr[i][j] = 255;
-						if ((i == 1) && (j == 1))
-							Tmatr[i][j] = 0;
-					}
-				}
-				var m1 = dimension;
-				var m2 = dimension;
-				var w1; 
+				dimension = 600;
+				Nmax = 1000;
+				Tmax = 200000;
+				
+				dt = 1;
+				i = 0;
+				j = 0;
+
+				points_counter=0;
 
 				a = Number($("#a")[0].value);
 				b = Number($("#b")[0].value);
 				c = Number($("#c")[0].value);
 				tau = Number($("#tau")[0].value);
 				xnegative = Number($("#xnegative")[0].value);
-				dt = 1;
-				i = 0;
-				j = 0;
-				//drawMatrix(Tmatr);
+
+				canvas = $("#field")[0];
+				context = canvas.getContext('2d');
+				context.lineWidth = 1;
+
+				Tmatr = new Array(dimension)
+				for (var i = 0; i < dimension; i++) {
+					Tmatr[i] = new Array(dimension);
+					for (var j = 0; j < dimension; j++) {
+						Tmatr[i][j] = 255;
+					}
+				}
+
 			}
 			
 			function makeTransformation() {
 				init();
-				console.log("a: "+a+" b: "+b+" c:"+c);
 
 				for(t=0; t<tau; t+=dt){
 					xcash[t] = xnegative;
@@ -137,60 +138,44 @@
 			    	
 					xcash[t%tau] = xk1;
 
-					i = toMatr(toCanvas(xk1));
-					j = toMatr(toCanvas(xtau));
+					i = toCanvas(xk1);
+					j = toCanvas(xtau);
 					if (isValidCoordinate(i) && isValidCoordinate(j)) {
 						Tmatr[i][j] = 0;	
-						points_counter++				
+						points_counter++;				
 					}
 				}
 
-				console.log(points_counter);
+				console.log("Points: ", points_counter);
 				drawMatrix(Tmatr);
 			}
 			
 			
 			function drawMatrix(matrix) {
-				canvas.width = canvas.width;
+				// clear canvas
+				canvas.width = canvas.width; 
+
 			    var imageData = context.getImageData(0, 0, dimension, dimension);  
 				var data = imageData.data;
-				// console.log("drawMatrix");
-				for (var i = 0; i < dimension; i++)
-				{
-					for (var j = 0; j < dimension; j++)
-					{
-					//	console.log(i + " " + j);
-						//console.log(matrix[i][j]);
+				
+				for (var i = 0; i < dimension; i++) {
+					for (var j = 0; j < dimension; j++) {
 					    data[((dimension * (dimension-j)) + i) * 4] = matrix[i][j]; //red
 						data[((dimension * (dimension-j)) + i) * 4 + 1] = matrix[i][j]; //green
 						data[((dimension * (dimension-j)) + i) * 4 + 2] = matrix[i][j];  //blue
 						data[((dimension * (dimension-j)) + i) * 4 + 3] = 255;  //alpha
 					}
 				}
-				context.clearRect(0, 0, dimension, dimension);  
 				context.putImageData(imageData, 0, 0); 
 			}
 			
-			function toMatr(i) {
-				return i-140
-				// return i+(dimension/2);
-				// return i;
-			}
-			
-			function toCoord(i) {
-				// return i - dimension/2;
-				return i - 200;
-			}
-
 			function toCanvas(r) {
-				var x = Math.floor(0.9*r*dimension);
-				// var x = dimension - Math.floor(r*dimension);
+				var x = Math.floor(0.9*r*dimension) - 140;
 				return  x;
 			}
 		
 			function toPlane(n) {
 				var x = n/dimension;
-				// var x = 1- n/dimension;
 				return x;
 			}
 
